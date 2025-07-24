@@ -1,217 +1,180 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de Movimento</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #121212;
+      overflow: hidden;
+      font-family: sans-serif;
+    }#bola {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de Sensores</title>
-    <style>
-      body {
-        margin: 0;
-        background-color: #111;
-        overflow: hidden;
-        position: relative;
-        font-family: sans-serif;
-      }
+#mensagemPermissao {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 70px);
+  transform: translateX(-50%);
+  color: white;
+  font-size: 16px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 10px;
+  z-index: 2;
+  display: none;
+}
 
-      #ball {
-        width: 40px;
-        height: 40px;
-        background-color: white;
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
+#btnConfig {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 3;
+}
 
-      #settingsBtn {
-        position: fixed;
-        bottom: 16px;
-        right: 16px;
-        background: white;
-        border: none;
-        font-size: 24px;
-        color: black;
-        border-radius: 50%;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        cursor: pointer;
-        z-index: 10;
-      }
+#btnConfig svg {
+  width: 32px;
+  height: 32px;
+  fill: black;
+}
 
-      #settingsPanel {
-        position: fixed;
-        left: 50%;
-        bottom: -100%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 400px;
-        background-color: #222;
-        border-radius: 16px 16px 0 0;
-        padding: 20px;
-        color: white;
-        transition: bottom 0.4s ease-in-out;
-        z-index: 20;
-      }
+#configPanel {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  background-color: #1e1e1e;
+  color: white;
+  padding: 20px;
+  transition: bottom 0.3s ease-out;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  z-index: 4;
+}
 
-      #settingsPanel.active {
-        bottom: 50%;
-        transform: translate(-50%, 50%);
-      }
+#configPanel.mostrar {
+  bottom: 25%;
+}
 
-      .closeBtn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 24px;
-        color: red;
-        cursor: pointer;
-        user-select: none;
-      }
+.config-header {
+  display: flex;
+  justify-content: flex-end;
+}
 
-      .closeBtn:active,
-      .closeBtn:hover {
-        color: orangered;
-      }
+#fecharConfig {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: red;
+  cursor: pointer;
+  transition: color 0.2s;
+}
 
-      label {
-        display: block;
-        margin-top: 20px;
-      }
+#fecharConfig:hover {
+  color: orangered;
+}
 
-      input[type="color"] {
-        width: 100%;
-        height: 40px;
-        border: none;
-        margin-top: 5px;
-        outline: none;
-        cursor: pointer;
-      }
-
-      #permissionMsg {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        background: rgba(0, 0, 0, 0.6);
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-        font-size: 18px;
-      }
-    </style>
-    <script type="text/javascript" src="./index.js" defer=""></script>
-    <link rel="stylesheet" href="./index.css">
-  </head>
-
-  <body>
-    <div id="ball"></div>
-    <button id="settingsBtn">⚙️</button>
-
-    <div id="settingsPanel">
-      <div class="closeBtn" id="closeBtn">✖</div>
-
-      <label for="bgColor">Cor da página:</label>
-      <input type="color" id="bgColor" value="#111111">
-
-      <label for="ballColor">Cor da bolinha:</label>
-      <input type="color" id="ballColor" value="#ffffff">
+  </style>
+</head>
+<body>
+  <div id="bola"></div>
+  <div id="mensagemPermissao">Toque na tela para permitir o uso do sensor de movimento</div>
+  <button id="btnConfig" aria-label="Abrir configurações" title="Configurações">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5zm7.43-2.57a7.97 7.97 0 0 0 0-1.86l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.23l-2.49 1a7.94 7.94 0 0 0-1.6-.93L14.5 2.5a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 0-.5.5L9.03 5.16c-.6.24-1.14.55-1.6.93l-2.49-1a.5.5 0 0 0-.6.23l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65a7.97 7.97 0 0 0 0 1.86L2.56 14.3a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .6.23l2.49-1c.47.38 1 .69 1.6.93L9.5 21.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5l.47-2.67c.6-.24 1.14-.55 1.6-.93l2.49 1a.5.5 0 0 0 .6-.23l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65z"/>
+    </svg>
+  </button>
+  <div id="configPanel">
+    <div class="config-header">
+      <button id="fecharConfig">✕</button>
     </div>
+    <div>
+      <label>Cor da página: <input type="color" id="corPagina" value="#121212" /></label>
+    </div>
+    <div>
+      <label>Cor da bolinha: <input type="color" id="corBola" value="#ffffff" /></label>
+    </div>
+  </div>  <script>
+    const bola = document.getElementById('bola');
+    const msgPermissao = document.getElementById('mensagemPermissao');
+    const btnConfig = document.getElementById('btnConfig');
+    const configPanel = document.getElementById('configPanel');
+    const fecharConfig = document.getElementById('fecharConfig');
+    const corPagina = document.getElementById('corPagina');
+    const corBola = document.getElementById('corBola');
 
-    <div id="permissionMsg">Toque na tela para permitir o uso dos sensores de movimento.</div>
+    let permitido = false;
 
-    <script>
-      const ball = document.getElementById("ball");
-      const settingsBtn = document.getElementById("settingsBtn");
-      const settingsPanel = document.getElementById("settingsPanel");
-      const closeBtn = document.getElementById("closeBtn");
-      const permissionMsg = document.getElementById("permissionMsg");
-
-      settingsBtn.addEventListener("click", () => {
-        settingsPanel.classList.add("active");
-      });
-
-      closeBtn.addEventListener("mousedown", () => {
-        closeBtn.style.color = "orangered";
-      });
-
-      closeBtn.addEventListener("mouseup", () => {
-        closeBtn.style.color = "red";
-        settingsPanel.classList.remove("active");
-      });
-
-      closeBtn.addEventListener("mouseleave", () => {
-        closeBtn.style.color = "red";
-      });
-
-      document.getElementById("bgColor").addEventListener("input", (e) => {
-        document.body.style.backgroundColor = e.target.value;
-      });
-
-      document.getElementById("ballColor").addEventListener("input", (e) => {
-        ball.style.backgroundColor = e.target.value;
-      });
-
-      function handleOrientation(event) {
-        const x = event.gamma || 0;
-        const y = event.beta || 0;
-
-        const maxX = 90;
-        const maxY = 90;
-
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
-
-        const centerX = screenWidth / 2;
-        const centerY = screenHeight / 2;
-
-        const offsetX = (x / maxX) * (screenWidth / 2 - 20);
-        const offsetY = (y / maxY) * (screenHeight / 2 - 20);
-
-        ball.style.left = `${centerX + offsetX}px`;
-        ball.style.top = `${centerY + offsetY}px`;
-      }
-
-      function initMotion() {
-        if (window.DeviceOrientationEvent) {
-          if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-              .then(permissionState => {
-                if (permissionState === 'granted') {
-                  window.addEventListener('deviceorientation', handleOrientation);
-                  permissionMsg.style.display = 'none';
-                } else {
-                  permissionMsg.textContent = 'Permissão negada para sensores de movimento.';
-                }
-              })
-              .catch(() => {
-                permissionMsg.textContent = 'Erro ao solicitar permissão para sensores de movimento.';
-              });
-          } else {
-            window.addEventListener('deviceorientation', handleOrientation);
-            permissionMsg.style.display = 'none';
+    window.addEventListener('click', async () => {
+      if (!permitido && typeof DeviceOrientationEvent?.requestPermission === 'function') {
+        try {
+          const resposta = await DeviceOrientationEvent.requestPermission();
+          if (resposta === 'granted') {
+            window.addEventListener('deviceorientation', moverBola);
+            msgPermissao.style.display = 'none';
+            permitido = true;
           }
-        } else {
-          permissionMsg.textContent = 'Sensores de movimento não suportados neste dispositivo.';
+        } catch (e) {
+          console.error('Permissão negada:', e);
         }
       }
+    });
 
-      document.body.addEventListener('click', () => {
-        if (permissionMsg) {
-          initMotion();
-        }
-      }, {
-        once: true
-      });
-    </script>
+    function moverBola(event) {
+      const x = event.gamma;
+      const y = event.beta;
 
+      const largura = window.innerWidth;
+      const altura = window.innerHeight;
+      const centroX = largura / 2;
+      const centroY = altura / 2;
 
-  </body>
+      const maxDeslocamento = 100;
 
+      const deslocX = Math.max(Math.min(x, 45), -45) * (maxDeslocamento / 45);
+      const deslocY = Math.max(Math.min(y, 45), -45) * (maxDeslocamento / 45);
+
+      bola.style.left = `${centroX + deslocX}px`;
+      bola.style.top = `${centroY + deslocY}px`;
+    }
+
+    // Mostrar mensagem se ainda não foi permitido
+    window.addEventListener('load', () => {
+      if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+        msgPermissao.style.display = 'block';
+      } else {
+        window.addEventListener('deviceorientation', moverBola);
+      }
+    });
+
+    btnConfig.addEventListener('click', () => {
+      configPanel.classList.add('mostrar');
+    });
+
+    fecharConfig.addEventListener('click', () => {
+      configPanel.classList.remove('mostrar');
+    });
+
+    corPagina.addEventListener('input', () => {
+      document.body.style.backgroundColor = corPagina.value;
+    });
+
+    corBola.addEventListener('input', () => {
+      bola.style.backgroundColor = corBola.value;
+    });
+  </script></body>
 </html>
