@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Sensores</title>
+    <style>
+      body {
+        margin: 0;
+        background-color: #111;
+        overflow: hidden;
+        position: relative;
+        font-family: sans-serif;
+      }
+
+      #ball {
+        width: 40px;
+        height: 40px;
+        background-color: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      #settingsBtn {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        background: white;
+        border: none;
+        font-size: 24px;
+        color: black;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        z-index: 10;
+      }
+
+      #settingsPanel {
+        position: fixed;
+        left: 50%;
+        bottom: -100%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 400px;
+        background-color: #222;
+        border-radius: 16px 16px 0 0;
+        padding: 20px;
+        color: white;
+        transition: bottom 0.4s ease-in-out;
+        z-index: 20;
+      }
+
+      #settingsPanel.active {
+        bottom: 50%;
+        transform: translate(-50%, 50%);
+      }
+
+      .closeBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        color: red;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .closeBtn:active,
+      .closeBtn:hover {
+        color: orangered;
+      }
+
+      label {
+        display: block;
+        margin-top: 20px;
+      }
+
+      input[type="color"] {
+        width: 100%;
+        height: 40px;
+        border: none;
+        margin-top: 5px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      #permissionMsg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 18px;
+      }
+    </style>
+    <script type="text/javascript" src="./index.js" defer=""></script>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+
+  <body>
+    <div id="ball"></div>
+    <button id="settingsBtn">⚙️</button>
+
+    <div id="settingsPanel">
+      <div class="closeBtn" id="closeBtn">✖</div>
+
+      <label for="bgColor">Cor da página:</label>
+      <input type="color" id="bgColor" value="#111111">
+
+      <label for="ballColor">Cor da bolinha:</label>
+      <input type="color" id="ballColor" value="#ffffff">
+    </div>
+
+    <div id="permissionMsg">Toque na tela para permitir o uso dos sensores de movimento.</div>
+
+    <script>
+      const ball = document.getElementById("ball");
+      const settingsBtn = document.getElementById("settingsBtn");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const closeBtn = document.getElementById("closeBtn");
+      const permissionMsg = document.getElementById("permissionMsg");
+
+      settingsBtn.addEventListener("click", () => {
+        settingsPanel.classList.add("active");
+      });
+
+      closeBtn.addEventListener("mousedown", () => {
+        closeBtn.style.color = "orangered";
+      });
+
+      closeBtn.addEventListener("mouseup", () => {
+        closeBtn.style.color = "red";
+        settingsPanel.classList.remove("active");
+      });
+
+      closeBtn.addEventListener("mouseleave", () => {
+        closeBtn.style.color = "red";
+      });
+
+      document.getElementById("bgColor").addEventListener("input", (e) => {
+        document.body.style.backgroundColor = e.target.value;
+      });
+
+      document.getElementById("ballColor").addEventListener("input", (e) => {
+        ball.style.backgroundColor = e.target.value;
+      });
+
+      function handleOrientation(event) {
+        const x = event.gamma || 0;
+        const y = event.beta || 0;
+
+        const maxX = 90;
+        const maxY = 90;
+
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        const centerX = screenWidth / 2;
+        const centerY = screenHeight / 2;
+
+        const offsetX = (x / maxX) * (screenWidth / 2 - 20);
+        const offsetY = (y / maxY) * (screenHeight / 2 - 20);
+
+        ball.style.left = `${centerX + offsetX}px`;
+        ball.style.top = `${centerY + offsetY}px`;
+      }
+
+      function initMotion() {
+        if (window.DeviceOrientationEvent) {
+          if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+              .then(permissionState => {
+                if (permissionState === 'granted') {
+                  window.addEventListener('deviceorientation', handleOrientation);
+                  permissionMsg.style.display = 'none';
+                } else {
+                  permissionMsg.textContent = 'Permissão negada para sensores de movimento.';
+                }
+              })
+              .catch(() => {
+                permissionMsg.textContent = 'Erro ao solicitar permissão para sensores de movimento.';
+              });
+          } else {
+            window.addEventListener('deviceorientation', handleOrientation);
+            permissionMsg.style.display = 'none';
+          }
+        } else {
+          permissionMsg.textContent = 'Sensores de movimento não suportados neste dispositivo.';
+        }
+      }
+
+      document.body.addEventListener('click', () => {
+        if (permissionMsg) {
+          initMotion();
+        }
+      }, {
+        once: true
+      });
+    </script>
+
+
+  </body>
+
+</html>
